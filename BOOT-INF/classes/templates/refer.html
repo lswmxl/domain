@@ -1,0 +1,132 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>注册次级域名分发系统子账号</title>
+	<link rel="stylesheet" href="jquery-easyui-1.9.14/themes/default/easyui.css" />
+	<link rel="stylesheet" href="jquery-easyui-1.9.14/themes/icon.css" />
+	<script type="text/javascript" src="jquery-easyui-1.9.14/jquery.min.js"></script>
+	<script type="text/javascript" src="jquery-easyui-1.9.14/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="jquery-easyui-1.9.14/locale/easyui-lang-zh_CN.js"></script>
+	<script type='text/javascript' src='bug-min.js'></script>
+	<style type="text/css">
+		body{
+			background-image:url('bg.svg');
+			width : 100%;
+			margin: 0 auto;
+		}
+		table{
+		    margin: auto;
+		}
+	</style>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes" />
+	<style type="text/css"> 
+		@media(max-width:960px){
+			body {
+				width:100%;
+			} 
+		}
+	</style>
+</head>
+<body>
+	<div id="dlg8" class="easyui-dialog" title="注册子账号" style="width: 360px; height: 285px; padding: 10px">
+		<div style="margin-bottom:15px">
+			<input id="userId" class="easyui-textbox" style="width:100%" data-options="prompt:'请输入用户名，长度(3~32)',iconCls:'icon-man', required: true">
+		</div>
+		<div style="margin-bottom:15px">
+			<input id="password"  class="easyui-textbox" style="width:100%" data-options="prompt:'请输入密码，长度(3~32)',iconCls:'icon-lock', required: true">
+		</div>
+		<div style="margin-bottom:10px">
+			<input id="inviteCd"  class="easyui-textbox" style="width:100%" data-options="prompt:'请输入邀请码',iconCls:'icon-promo16', required: true">
+		</div>
+		
+		<div style="width:100%;font-size: 12" id="refertips" >请输入名字，密码和邀请码之后点击注册，请勿刷新或者重复点击注册，否则可能会导致邀请码失效</div>
+	</div>
+
+	<script>
+		new BugController({'minBugs':1, 'maxBugs':1, 'mouseOver':'fly'});
+		$('#dlg8').dialog({
+		    cache: false,
+			iconCls: 'icon-check',
+			resizable: false,
+			closable: false,
+		    modal: true,
+			buttons: [{
+				text:'注册',
+				iconCls:'icon-ok',
+				handler:function(){
+					submitForm();
+				}
+			},{
+				text:'重置',
+				handler: function(){
+					clearForm();
+				}
+			}]
+		});
+	
+		function checkUserId(){
+			var userId = $('#userId').textbox('getText');
+			if(userId.length>=3&&userId.length<=32){
+				return true;
+			}
+			else{
+				$('#refertips').html("<div><font color='red'>用户名长度为3~32位</font></div>");
+				return false;
+			}
+		}
+		
+		function checkPassword(){
+			var password = $('#password').textbox('getText');
+			if(password.length>=3&&password.length<=32){
+				return true;
+			}
+			else{
+				$('#refertips').html("<div><font color='red'>用户名长度为3~32位</font></div>");
+				return false;
+			}
+		}
+		
+		function submitForm(){
+			var userId = $('#userId').textbox('getText');
+			var password = $('#password').textbox('getText');
+			var inviteCd = $('#inviteCd').textbox('getText');
+			
+			if(checkUserId()&&checkPassword()&&inviteCd!=''){
+				$.ajax({
+					type : "POST",
+					url : "/createUserByInviteCd",
+					data : {
+						"inviteCd" : inviteCd,
+						"userId" : userId,
+						"password" : password
+					},
+					async : false,
+					success : function(result) {
+						var strs = result.split("|");
+						if(strs[0]=="0"){
+							$('#refertips').html("<div><font color='green'>账号已创建，请点此处<a href='/' target='_blank'>登录</a></font></div>");
+							flag = true;
+						}
+						else{
+							$('#refertips').html("<div><font color='red'>"+result+"</font></div>");
+						}
+					},
+					error : function(){
+						$('#refertips').html("<div><font color='red'>服务器内部错误</font></div>");
+					}
+				});
+			}
+			else{
+				$('#refertips').html("<div><font color='red'>输入不符合要求，请重新检查</font></div>");
+			}
+		}
+		function clearForm(){
+			$('#userId').textbox('setText','');
+			$('#password').textbox('setText','');
+			$('#inviteCd').textbox('setText','');
+			$('#refertips').text('请输入名字，密码和邀请码之后点击注册，请勿刷新或者重复点击注册，否则可能会导致邀请码失效');
+		}
+	</script>
+
+</body>
+</html>

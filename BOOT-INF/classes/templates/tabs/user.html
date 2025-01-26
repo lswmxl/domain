@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Client Side Pagination in DataGrid - jQuery EasyUI Demo</title>
+
+</head>
+<body>
+	<div id="tb3"></div>
+	<div id="dlg3"></div>
+	
+	<script type="text/javascript" th:inline="none">
+		var row3;
+
+		$('#tb3').datagrid({
+			border:false,
+			fit:true,
+			striped:true,
+			rownumbers : true,
+			//singleSelect:true,
+			autoRowHeight:false,
+			pagination:true,
+			pageSize : 100,
+			pageList : [100,200,500],
+			remoteSort: false,
+			url:'/getUsers',
+			method:'post',
+			toolbar: [{
+				text:'刷新',
+				iconCls:'icon-reload',
+				handler:function(){
+					$('#tb3').datagrid('reload');
+				}
+			},'-',{
+				text:'启用',
+				iconCls:'icon-enable',
+				handler:function(){
+					row3 = $('#tb3').datagrid('getSelections');
+					if(row3!=null&&row3.length>0){
+						var uids = '';
+						for(var rr of row3){
+							uids = uids + rr.seqNo + ',';
+						}
+						var accountEnabled = true;
+						$.ajax({
+						    type : "POST", 
+						    url : "/updateUserStatus",
+						    data : { "uids": uids , "status" : accountEnabled},
+						    success : function() {
+						       	$.messager.show({
+									title:'提示',
+									msg: '启用用户已成功',
+									timeout:3000,
+									showType:'slide'
+								}); 
+						       	$('#tb3').datagrid('reload');
+							},
+							error : function(){
+						       	$.messager.show({
+									title:'失败',
+									msg:'启用用户失败，这可能是由于服务器出现问题引起的',
+									timeout:2000,
+									showType:'slide'
+								}); 
+							}							
+						});
+						row3 = null;
+					}
+					else{
+						$.messager.show({
+							title:'错误',
+							msg:'请至少选择一行',
+							timeout:2000,
+							showType:'slide'
+						});
+					}
+				}
+			},{
+				text:'禁用',
+				iconCls:'icon-disable',
+				handler:function(){
+					row3 = $('#tb3').datagrid('getSelections');
+					if(row3!=null&&row3.length>0){
+						var uids = '';
+						for(var rr of row3){
+							uids = uids + rr.seqNo + ',';
+						}
+						var accountEnabled = false;
+						$.ajax({
+						    type : "POST", 
+						    url : "/updateUserStatus",
+						    data : { "uids": uids , "status" : accountEnabled},
+						    success : function() {
+						       	$.messager.show({
+									title:'提示',
+									msg: '禁用用户成功，请注意禁用用户并不会删除其CF解析',
+									timeout:3000,
+									showType:'slide'
+								}); 
+						       	$('#tb3').datagrid('reload');
+							},
+							error : function(){
+						       	$.messager.show({
+									title:'失败',
+									msg:'禁用用户失败，这可能是由于服务器出现问题引起的',
+									timeout:2000,
+									showType:'slide'
+								}); 
+							}							
+						});
+						row3 = null;
+					}
+					else{
+						$.messager.show({
+							title:'错误',
+							msg:'请至少选择一行',
+							timeout:2000,
+							showType:'slide'
+						});
+					}
+				}
+			},{
+				text:'帮助',
+				iconCls:'icon-help',
+				handler:function(){
+					$.messager.alert('帮助','<b>1.</b> 即使用户被禁用，只要管理员不删除他的解析那么，他的CF解析仍然可用<br>'+
+							'<b>2.</b> 如果想要完全禁止用户及其解析，先禁用此用户，然后请前往[用户]->管理用户域名中删除所有属于该用户编号的解析即可','');
+				}
+			}],
+			columns : [[
+				{field : 'ck',title : '选中',align : 'center',checkbox: true}, 
+				{field : 'acctStatus',title : '用户状态',align : 'center',sortable:true,
+					formatter: function(value,row,index){
+						if(value==1){
+							return "<font color='green'>可用</font>";
+						}
+						else{
+							return "<font color='red'>禁用</font>";
+						}
+					}
+				}, 
+				{field : 'seqNo',title : '用户编号',align : 'center',sortable:true}, 
+				{field : 'userId',title : '用户名',align : 'center',sortable:true}, 
+				{field : 'passwd',title : '密码',align : 'center',sortable:true},
+				{field : 'acctRole',title : '角色',align : 'center',sortable:true,
+					formatter: function(value,row,index){
+						if(value=="9"){
+							return "管理员";
+						}
+						else if(value=="1") {
+							return "普通用户";
+						}
+						else{
+							return value;
+						}
+					}
+				},
+				{field : 'curSubDomain',title : '当前子域个数',align : 'center',sortable:true},
+				{field : 'maxSubDomain',title : '最大子域个数',align : 'center',sortable:true},
+			]],
+            onLoadError: function (data){
+            	console.log(data);
+            	$.messager.alert('错误', data.responseText ,'error');
+				$('#tb3').datagrid('loadData',{'total':0,'rows':[]});
+            }
+		});
+	</script>
+	
+</body>
+</html>
