@@ -2,7 +2,7 @@
 ```apt update -y && apt install default-jre wget -y```
 
 2.
-```wget https://github.com/lswmxl/domain/releases/download/v0.0.01/domain.v0.0.01.jar```
+```wget https://github.com/lswmxl/domain/releases/download/v1.0.0/domain.jar```
 
 4.
 ```nohup java -jar domain.v0.0.01.jar  >/dev/null 2>&1 &```
